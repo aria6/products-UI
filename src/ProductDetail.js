@@ -43,7 +43,7 @@ function ProductDetail(props: Props) {
       return textValue;
     }
   };
-  let deleteClick = (name: string) => {
+  let deleteClick = (id: string) => {
     /*eslint-disable no-alert, no-console*/
     let wantDelete = confirm(`Are you sure want to delete this product?`);
     /*eslint-enable no-alert*/
@@ -51,7 +51,7 @@ function ProductDetail(props: Props) {
       let options = {
         method: 'DELETE',
       };
-      fetch(`http://127.0.0.1:8000/products/delete/${name}`, options).then((response) => response.json()).then(() => componentWillMount());
+      fetch(`http://127.0.0.1:8000/products/delete/${id}`, options).then((response) => response.json()).then(() => componentWillMount());
     }
   };
 
@@ -95,7 +95,7 @@ function ProductDetail(props: Props) {
             />
             <Button
               nameButton={(isEdit) ? 'Cancel' : 'Delete'}
-              onClick={(isEdit) ? cancel : () => deleteClick(name)}
+              onClick={(isEdit) ? cancel : () => deleteClick(id)}
             />
           </View>
         </View>
