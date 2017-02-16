@@ -15,6 +15,9 @@ type Props = {
   isEdit: boolean;
   isAdd: boolean;
   cancel: () => void;
+  deleteClick: (string) => void;
+  saveEdit: (string, Object, Object) => void;
+  saveNewProduct: (Object) => void;
   componentWillMount: () => void;
 };
 
@@ -25,11 +28,12 @@ let onTextChange = (string, idText) => {
 };
 
 function ProductDetail(props: Props) {
-  let {selectedID, detailProduct, componentWillMount, clickEdit, isEdit, isAdd, cancel} = props;
+  let {selectedID, detailProduct, componentWillMount, clickEdit,
+  isEdit, isAdd, cancel, deleteClick, saveEdit, saveNewProduct} = props;
   let result;
 
   if (isAdd) {
-    return CreateProduct(cancel, componentWillMount);
+    return CreateProduct(cancel, componentWillMount, saveNewProduct);
   }
 
   let inputOrData = (textValue: string, idText: string) => {
@@ -43,32 +47,10 @@ function ProductDetail(props: Props) {
       return textValue;
     }
   };
-  let deleteClick = (id: string) => {
-    /*eslint-disable no-alert, no-console*/
-    let wantDelete = confirm(`Are you sure want to delete this product?`);
-    /*eslint-enable no-alert*/
-    if (wantDelete) {
-      let options = {
-        method: 'DELETE',
-      };
-      fetch(`http://127.0.0.1:8000/products/delete/${id}`, options).then((response) => response.json()).then(() => componentWillMount());
-    }
-  };
-
-  let saveEdit = (id) => {
-    tempObj['id'] = id;
-    let options = {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(tempObj),
-    };
-    fetch(`http://127.0.0.1:8000/products/change`, options);
-  };
 
   if (detailProduct) {
     if (selectedID) {
+      let product = detailProduct;
       let name = detailProduct.name;
       let id = detailProduct.id;
       result = (
@@ -91,7 +73,10 @@ function ProductDetail(props: Props) {
           <View>
             <Button
               nameButton={(isEdit) ? 'Save' : 'Edit'}
-              onClick={(isEdit) ? () => saveEdit(id) : clickEdit}
+              onClick={(isEdit) ? () => {
+                saveEdit(id, product, tempObj);
+                tempObj = {};
+              } : clickEdit}
             />
             <Button
               nameButton={(isEdit) ? 'Cancel' : 'Delete'}
@@ -110,31 +95,7 @@ function ProductDetail(props: Props) {
   return result;
 }
 
-function CreateProduct(cancel: () => void, componentWillMount: () => void) {
-
-  let saveNewProduct = () => {
-    if (tempObj.name) {
-      let options = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(tempObj),
-      };
-      console.log(options);
-      fetch(`http://127.0.0.1:8000/products/create`, options).then((data) => {
-        if (data.ok) {
-          componentWillMount();
-        } else {
-          console.log(data);
-        }
-      });
-    } else {
-      /*eslint-disable no-alert, no-console*/
-      alert('Product name cannot empty..!!');
-      /*eslint-enable no-alert*/
-    }
-  };
+function CreateProduct(cancel: () => void, componentWillMount: () => void, saveNewProduct: (Object) => void) {
 
   return (
     <View>
@@ -174,7 +135,10 @@ function CreateProduct(cancel: () => void, componentWillMount: () => void) {
       <View>
         <Button
           nameButton="Save"
-          onClick={saveNewProduct}
+          onClick={() => {
+            saveNewProduct(tempObj);
+            tempObj = {};
+          }}
         />
         <Button
           nameButton="Cancel"

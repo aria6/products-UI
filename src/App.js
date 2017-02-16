@@ -18,7 +18,7 @@ type State = {
   isLoading: boolean;
   isEdit: boolean;
   isAdd: boolean;
-  selectedID?: string;
+  selectedID?: ?string;
   searchText?: string;
 };
 
@@ -65,16 +65,85 @@ class App extends Component {
       }
     });
 
-    let clickEdit = () => {
-      if (this.state.isEdit) {
-        this.setState({isEdit: false});
-      } else {
-        this.setState({isEdit: true});
+    let deleteClick = (id: string) => {
+      /*eslint-disable no-alert, no-console*/
+      let wantDelete = confirm(`Are you sure want to delete this product?`);
+      /*eslint-enable no-alert*/
+      if (wantDelete) {
+        let options = {
+          method: 'DELETE',
+        };
+        fetch(`http://127.0.0.1:8000/products/delete/${id}`, options)
+        .then((response) => response.json())
+        .then(() => this.componentWillMount())
+        .catch((error) => console.error(error));
       }
     };
 
+    let saveEdit = (id, oldObj, tempObj) => {
+      if (Object.keys(tempObj).length !== 0) {
+        tempObj['id'] = id;
+        if (!tempObj.hasOwnProperty('name')) {
+          tempObj['name'] = oldObj.name;
+        }
+        if (!tempObj.hasOwnProperty('desc')) {
+          tempObj['desc'] = oldObj.desc;
+        }
+        if (!tempObj.hasOwnProperty('price')) {
+          tempObj['price'] = oldObj.price;
+        }
+        let options = {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(tempObj),
+        };
+        fetch(`http://127.0.0.1:8000/products/change`, options)
+        .then((response) => response.json())
+        .then(() => {
+          this.componentWillMount();
+          cancel();
+        })
+        .catch((error) => console.error(error));
+      } else {
+        cancel();
+      }
+    };
+
+    let saveNewProduct = (tempObj) => {
+      if (tempObj.name) {
+        let options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(tempObj),
+        };
+        fetch(`http://127.0.0.1:8000/products/create`, options)
+        .then(() => {
+          this.componentWillMount();
+          cancel();
+        })
+        .catch((error) => console.error(error));
+      } else {
+        /*eslint-disable no-alert, no-console*/
+        alert('Product name cannot empty..!!');
+        /*eslint-enable no-alert*/
+      }
+    };
+
+    let clickEdit = () => {
+      this.setState({
+        isEdit: true,
+        isAdd: false,
+      });
+    };
+
     let clickProduct = (id: string) => {
-      this.setState({selectedID: id});
+      if (!this.state.isAdd) {
+        this.setState({selectedID: id});
+      }
     };
 
     let cancel = () => {
@@ -115,6 +184,9 @@ class App extends Component {
               isEdit={isEdit}
               isAdd={isAdd}
               cancel={cancel}
+              deleteClick={deleteClick}
+              saveEdit={saveEdit}
+              saveNewProduct={saveNewProduct}
               componentWillMount={this.componentWillMount}
             />
           </View>
@@ -129,7 +201,13 @@ class App extends Component {
     };
 
     let showForm = () => {
-      this.setState({isAdd: true});
+      if (!this.state.isEdit) {
+        this.setState({
+          isAdd: true,
+          isEdit: false,
+          selectedID: null,
+        });
+      }
     };
 
     return (
