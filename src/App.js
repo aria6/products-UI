@@ -120,6 +120,7 @@ class App extends Component {
           },
           body: JSON.stringify(tempObj),
         };
+        console.log(tempObj);
         fetch(`http://127.0.0.1:8000/products/create`, options)
         .then(() => {
           this.componentWillMount();
@@ -171,7 +172,6 @@ class App extends Component {
         <View style={body}>
           <View id="productList" style={productListStyle}>
             <ProductList
-              // products={this.state.products}
               products={productsFilter}
               clickProduct={clickProduct}
             />

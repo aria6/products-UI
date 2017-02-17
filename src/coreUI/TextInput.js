@@ -3,21 +3,32 @@ import React from 'react';
 
 type Props = {
   isMultiline: boolean;
-  onTextChange: (text: string) => void;
+  isUploadFile?: boolean;
+  onTextChange?: (text: string) => void;
+  onChange?: (Object) => void;
   otherAttr?: Object;
 };
 
 function TextInput(props: Props) {
-  let {isMultiline, onTextChange, otherAttr} = props;
+  let {isMultiline, isUploadFile, onTextChange, onChange, otherAttr} = props;
 
-  let onChange = (event: {target: {value: string}}) => {
-    onTextChange(event.target.value);
+  let onChangeHandler = (event: {target: {value: string}}) => {
+    if (onChange != null) {
+      onChange(event);
+    }
+    if (onTextChange != null) {
+      onTextChange(event.target.value);
+    }
   };
 
   if (isMultiline) {
-    return <textarea type="text" onChange={onChange} {...otherAttr} />;
+    return <textarea type="text" onChange={onChangeHandler} {...otherAttr} />;
   } else {
-    return <input type="text" onChange={onChange} {...otherAttr} />;
+    if (isUploadFile) {
+      return <input type="file" onChange={onChangeHandler} {...otherAttr} />;
+    } else {
+      return <input type="text" onChange={onChangeHandler} {...otherAttr} />;
+    }
   }
 }
 

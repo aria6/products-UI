@@ -5,4 +5,6 @@ export type ProductDetailType = {
   name: string;
   desc: string;
   price: string;
+  imagePath: string;
+  imageBase64: string;
 };

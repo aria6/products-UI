@@ -3,6 +3,8 @@ import React from 'react';
 import View from './coreUI/View';
 import Button from './coreUI/Button';
 import TextInput from './coreUI/TextInput';
+import Image from './coreUI/Image';
+import checkExtention from './helpers/checkExtentions';
 
 import type {ProductDetailType} from './types/ProductDetail';
 
@@ -48,13 +50,25 @@ function ProductDetail(props: Props) {
     }
   };
 
+  let imageProduct = {
+    width: '25%',
+    height: '25%',
+  };
+
   if (detailProduct) {
     if (selectedID) {
       let product = detailProduct;
       let name = detailProduct.name;
       let id = detailProduct.id;
+      let srcImage = `http://127.0.0.1:8000/images/${detailProduct.imagePath}`;
       result = (
         <View>
+          <View style={blockDetailStyle}>
+            <Image
+              source={srcImage}
+              style={imageProduct}
+            />
+          </View>
           <View style={blockDetailStyle}>
             <View style={blockNameStyle}>Name</View>
             <View style={blockDCStyle}>:</View>
@@ -129,6 +143,33 @@ function CreateProduct(cancel: () => void, componentWillMount: () => void, saveN
             isMultiline={false}
             onTextChange={(string) => onTextChange(string, 'price')}
             otherAttr={{placeholder: 'Price Product'}}
+          />
+        </View>
+      </View>
+      <View style={blockDetailStyle}>
+        <View style={blockNameStyle}>Upload File</View>
+        <View style={blockDCStyle}>:</View>
+        <View style={blockItemStyle}>
+          <TextInput
+            isMultiline={false}
+            isUploadFile={true}
+            onChange={(event) => {
+              let nameFile = event.target.files[0].name;
+              if (!checkExtention(nameFile)) {
+                /*eslint-disable no-alert, no-console*/
+                alert('Just .png, .jpg, .jpeg Aloweed');
+                /*eslint-enable no-alert*/
+              } else {
+                let reader = new FileReader();
+
+                reader.onload = function(event) {
+                  onTextChange(event.target.result, 'imageBase64');
+                };
+
+                reader.readAsDataURL(event.target.files[0]);
+                onTextChange(nameFile, 'imagePath');
+              }
+            }}
           />
         </View>
       </View>
